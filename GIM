@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0f172a">
+
+<title>Gestor Rutina Pro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+input { font-size:16px; }
+/* Quitar flechas molestas en inputs numéricos */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+</style>
+
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+<div class="max-w-7xl mx-auto p-4">
+
+<h1 class="text-3xl font-bold mb-4">🏋️ Gestor de Rutina Semanal</h1>
+
+<div class="flex gap-2 mb-4">
+  <button onclick="exportData()" class="bg-green-600 px-3 py-2 rounded text-sm font-semibold">📤 Exportar Copia</button>
+  <button onclick="importData()" class="bg-blue-600 px-3 py-2 rounded text-sm font-semibold">📥 Importar Copia</button>
+</div>
+
+<p class="mb-4 text-slate-300">Incluye cronómetro manual, historial por ejercicio, control de medidas corporales y guardado local.</p>
+
+<div id="mainPage">
+  <div id="menu" class="grid md:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+</div>
+
+<div id="routineView" class="hidden">
+<div class="flex gap-2 mb-3">
+  <button onclick="backHome()" class="bg-slate-700 px-3 py-2 rounded text-sm font-semibold">⬅ Volver</button>
+</div>
+
+<div class="flex flex-wrap gap-4 items-center mb-4 bg-slate-800 p-4 rounded">
+  <h2 id="title" class="text-2xl font-bold"></h2>
+  <button id="startTimerBtn" onclick="startTimerManual()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded font-bold text-sm">▶️ Iniciar</button>
+  <div class="bg-slate-700 px-4 py-2 rounded font-mono text-xl font-bold">⏱️ <span id="timer">00:00:00</span></div>
+
+  <div class="flex-1">
+    <div class="bg-slate-700 h-4 rounded">
+      <div id="bar" class="bg-green-500 h-4 rounded" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="pct" class="font-bold">0%</div>
+</div>
+
+<div id="exercises"></div>
+
+<div class="mt-6 mb-8 text-center">
+  <button onclick="finishRoutine()" class="bg-green-600 hover:bg-green-500 text-white text-xl font-bold py-4 px-8 rounded-xl shadow-lg transition w-full md:w-auto">
+    🏁 Finalizar Sesión y Guardar
+  </button>
+</div>
+</div>
+
+<div id="measuresView" class="hidden">
+  <button onclick="backHome()" class="bg-slate-700 px-3 py-2 rounded mb-4 text-sm font-semibold">⬅ Volver</button>
+  
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="bg-slate-800 p-6 rounded-xl">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">📏 Registrar Medidas (cm)</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Brazo</label>
+          <input id="m_brazo" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Pierna</label>
+          <input id="m_pierna" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Cintura</label>
+          <input id="m_cintura" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Estómago</label>
+          <input id="m_estomago" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Cadera</label>
+          <input id="m_cadera" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">Pecho</label>
+          <input id="m_pecho" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
+        </div>
+      </div>
+      <button onclick="saveMeasures()" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-lg">💾 Guardar Medidas</button>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-xl flex flex-col justify-between">
+      <div>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-2">📈 Histórico & Gráficas</h2>
+          <button onclick="toggleMeasuresChart()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded font-bold text-sm">📊 Ver/Ocultar Gráfica</button>
+        </div>
+        
+        <div id="chartContainer" class="hidden bg-slate-950 p-2 rounded-lg mb-4">
+          <canvas id="measuresChart" class="w-full h-64"></canvas>
+        </div>
+
+        <div class="overflow-x-auto max-h-80 overflow-y-auto">
+          <table class="w-full text-sm text-left text-slate-300">
+            <thead class="text-xs uppercase bg-slate-700 text-slate-200 sticky top-0">
+              <tr>
+                <th class="px-2 py-2">Fecha</th>
+                <th class="px-1 py-2 text-center">Br</th>
+                <th class="px-1 py-2 text-center">Pi</th>
+                <th class="px-1 py-2 text-center">Ci</th>
+                <th class="px-1 py-2 text-center">Es</th>
+                <th class="px-1 py-2 text-center">Ca</th>
+                <th class="px-1 py-2 text-center">Pe</th>
+              </tr>
+            </thead>
+            <tbody id="measuresTableBody">
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 overflow-auto z-50">
+<div class="max-w-4xl mx-auto bg-slate-800 p-4 rounded">
+<div class="flex justify-between">
+<h3 class="text-xl font-bold">📈 Histórico</h3>
+<button onclick="closeModal()" class="text-2xl font-bold">&times;</button>
+</div>
+<div id="modalContent" class="mt-4"></div>
+</div>
+</div>
+
+</div>
+
+<script>
+
+// ✅ STORAGE SEGURO (Mantiene lógica original + Ampliación para medidas)
+let store;
+try {
+  store = JSON.parse(localStorage.getItem("gymPro")) 
+    || {sessions:[],history:{},active:{}, measures:[]};
+  if(!store.measures) store.measures = []; // Por si venías de una versión antigua
+} catch {
+  store = {sessions:[],history:{},active:{}, measures:[]};
+}
+
+const routines={
+"Sesion 1 Superior":[
+["Press mancuernas plano",4,"8-10"],["Remo pecho apoyado",4,"8-10"],["Pullover",3,"12-15"],["Elevaciones laterales",2,"15"],["Curl alterno",3,"10-12"],["Abwheel",3,"6-10"]
+],
+"Sesion 2 Inferior":[
+["Sentadilla Goblet",4,"10-12"],["Bulgarian split",3,"10"],["Hip thrust",4,"10"],["Plancha frontal",3,"45s"],["Plancha lateral",3,"30s"]
+],
+"Sesion 3 Superior":[
+["Flexiones déficit",4,"10-15"],["Remo unilateral",4,"10-12"],["Press inclinado",3,"10"],["Face pull goma",3,"15"],["Curl araña",3,"12"],["Katana tríceps",3,"12-15"]
+],
+"Sesion 4 Inferior":[
+["Hack squat",4,"10-12"],["Peso muerto rumano",4,"10"],["Step up",3,"12"],["Sentadilla isométrica",3,"45-60s"],["Russian twist",3,"20"]
+]
+};
+
+const desc={};
+Object.keys(routines).forEach(r=>routines[r].forEach(e=>desc[e[0]]="Ejecuta el movimiento de forma controlada, manteniendo una técnica correcta y rango completo."));
+
+let current=null,startTime=null,timerInt=null,timerRunning=false;
+let myChartInstance = null; // Instancia global de Chart.js
+
+const menu=document.getElementById("menu");
+
+// Generar botones de rutinas en el menú principal
+Object.keys(routines).forEach(r=>{
+  menu.innerHTML+=`<button class="bg-slate-800 p-6 rounded-xl hover:bg-slate-700 text-lg font-bold border border-slate-700 transition flex flex-col items-center justify-center gap-2" onclick="openRoutine('${r}')"><span>🏋️‍♂️</span> ${r}</button>`;
+});
+// ✅ Añadir botón de Medidas al final
+menu.innerHTML+=`<button class="bg-gradient-to-br from-blue-900 to-indigo-900 p-6 rounded-xl hover:from-blue-800 hover:to-indigo-800 text-lg font-bold border border-blue-700 transition flex flex-col items-center justify-center gap-2" onclick="openMeasures()"><span>📏</span> Medidas Corporales</button>`;
+
+function openRoutine(r){
+current=r;
+document.getElementById("mainPage").classList.add("hidden");
+document.getElementById("routineView").classList.remove("hidden");
+document.getElementById("title").textContent=r;
+
+// ✅ Lógica de resetear sesión activa al abrir: Cajas en blanco siempre al iniciar
+routines[current].forEach((e, idx) => {
+  for(let i=1; i<=e[1]; i++) {
+    delete store.active[`${current}_${idx}_${i}`];
+  }
+});
+persist();
+
+// Resetear Cronómetro y prepararlo para inicio manual
+clearInterval(timerInt);
+timerRunning = false;
+startTime = null;
+document.getElementById("timer").textContent = "00:00:00";
+document.getElementById("startTimerBtn").classList.remove("hidden");
+
+render();
+}
+
+// ✅ INICIO MANUAL DEL CRONÓMETRO
+function startTimerManual() {
+  if (timerRunning) return;
+  startTime = Date.now();
+  timerInt = setInterval(updateTimer, 1000);
+  timerRunning = true;
+  document.getElementById("startTimerBtn").classList.add("hidden");
+}
+
+function updateTimer(){
+if(!startTime) return;
+let s=Math.floor((Date.now()-startTime)/1000);
+let h=String(Math.floor(s/3600)).padStart(2,'0');
+let m=String(Math.floor((s%3600)/60)).padStart(2,'0');
+let ss=String(s%60).padStart(2,'0');
+document.getElementById("timer").textContent=`${h}:${m}:${ss}`;
+}
+
+function render(){
+const ex=document.getElementById("exercises");
+ex.innerHTML="";
+let total=0,done=0;
+
+routines[current].forEach((e,idx)=>{
+let html=`<div class="bg-slate-800 p-4 rounded-xl mb-4 border border-slate-700">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold text-lg text-emerald-400">${e[0]}</h3>
+<button class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-xs font-semibold" onclick="showHistory('${e[0]}')">📈 Histórico</button>
+</div>
+<p class="text-slate-400 text-xs mb-2">${desc[e[0]]}</p>
+<p class="mb-3 text-sm font-semibold text-slate-300">🎯 ${e[1]} series x ${e[2]} reps</p>`;
+
+for(let i=1;i<=e[1];i++){
+total++;
+let key=`${current}_${idx}_${i}`;
+let data=store.active[key]||{reps:"",weight:""};
+
+if(data.reps && data.weight) done++;
+
+html+=`<div class="grid grid-cols-4 gap-2 mb-2 items-center text-sm bg-slate-900/50 p-1.5 rounded">
+<div class="text-slate-400 pl-1 font-medium">Serie ${i}</div>
+<div>
+  <input class="w-full text-black p-1 rounded text-center font-bold" type="number" inputmode="numeric" value="${data.reps}" placeholder="Reps" onchange="saveSet('${key}','reps',this.value)">
+</div>
+<div>
+  <input class="w-full text-black p-1 rounded text-center font-bold" type="number" inputmode="decimal" step="any" value="${data.weight}" placeholder="Peso" onchange="saveSet('${key}','weight',this.value)">
+</div>
+<div class="text-center text-lg">${data.reps&&data.weight?'✅':'⏳'}</div>
+</div>`;
+}
+
+html+="</div>";
+ex.innerHTML+=html;
+});
+
+let pct=Math.round(done*100/total)||0;
+document.getElementById("bar").style.width=pct+"%";
+document.getElementById("pct").textContent=pct+"%";
+}
+
+function saveSet(k,f,v){
+if(!store.active[k]) store.active[k]={};
+store.active[k][f]=v;
+persist();
+render();
+}
+
+// ✅ SE EJECUTA SÓLO AL DARLE AL BOTÓN EXPLÍCITO DE FINALIZAR
+function finishRoutine(){
+// Forzar detención de cronómetro si seguía corriendo
+clearInterval(timerInt);
+
+let duration=document.getElementById("timer").textContent;
+let date=new Date().toLocaleString();
+
+routines[current].forEach((e,idx)=>{
+let entry={date,routine:current,duration,sets:[]};
+
+for(let i=1;i<=e[1];i++){
+let d=store.active[`${current}_${idx}_${i}`]||{};
+entry.sets.push({serie:i,reps:d.reps||"",weight:d.weight||""});
+}
+
+if(!store.history[e[0]]) store.history[e[0]]=[];
+store.history[e[0]].push(entry);
+});
+
+store.sessions.push({date,routine:current,duration});
+
+// Limpiar sesión activa al acabar definitivamente
+routines[current].forEach((e, idx) => {
+  for(let i=1; i<=e[1]; i++) {
+    delete store.active[`${current}_${idx}_${i}`];
+  }
+});
+
+persist();
+alert("🎉 Rutina guardada con éxito en el historial.\nDuración total: "+duration);
+backHome();
+}
+
+function showHistory(ex){
+let h=store.history[ex]||[];
+let out=`<h4 class='font-bold text-xl mb-3 text-emerald-400'>${ex}</h4>`;
+
+if(!h.length) out+="<p class='text-slate-400'>Sin historial registrado en este ejercicio.</p>";
+
+h.slice().reverse().forEach(s=>{
+out+=`<div class="border border-slate-700 bg-slate-900 p-3 mb-3 rounded-lg text-sm">
+<div class="grid grid-cols-2 gap-1 mb-2 text-slate-300">
+  <div><b>Fecha:</b> ${s.date}</div>
+  <div><b>Duración:</b> ${s.duration}</div>
+</div>
+
+<table class="w-full mt-2 text-center text-xs">
+<tr class="bg-slate-700 text-slate-200">
+  <th class="py-1">Serie</th>
+  <th class="py-1">Reps</th>
+  <th class="py-1">Peso (kg)</th>
+</tr>
+${s.sets.map(x=>`<tr class="border-b border-slate-800"><td class="py-1 font-bold">${x.serie}</td><td>${x.reps || '-'}</td><td>${x.weight || '-'}</td></tr>`).join("")}
+</table>
+</div>`;
+});
+
+document.getElementById("modalContent").innerHTML=out;
+document.getElementById("modal").classList.remove("hidden");
+}
+
+function closeModal(){
+document.getElementById("modal").classList.add("hidden");
+}
+
+function persist(){
+localStorage.setItem("gymPro",JSON.stringify(store));
+}
+
+function backHome(){
+clearInterval(timerInt);
+timerRunning = false;
+document.getElementById("routineView").classList.add("hidden");
+document.getElementById("measuresView").classList.add("hidden");
+document.getElementById("mainPage").classList.remove("hidden");
+}
+
+// ================= SECCIÓN DE MEDIDAS CORPORALES =================
+
+function openMeasures(){
+  document.getElementById("mainPage").classList.add("hidden");
+  document.getElementById("measuresView").classList.remove("hidden");
+  // Ocultar gráfica por defecto al entrar
+  document.getElementById("chartContainer").classList.add("hidden");
+  
+  // Limpiar inputs
+  const fields = ['brazo', 'pierna', 'cintura', 'estomago', 'cadera', 'pecho'];
+  fields.forEach(f => document.getElementById(`m_${f}`).value = "");
+  
+  renderMeasuresTable();
+}
+
+function saveMeasures() {
+  const fields = ['brazo', 'pierna', 'cintura', 'estomago', 'cadera', 'pecho'];
+  let data = {
+    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  };
+  
+  let valid = false;
+  fields.forEach(f => {
+    let val = document.getElementById(`m_${f}`).value;
+    if(val) valid = true;
+    data[f] = val ? parseFloat(val) : 0;
+  });
+  
+  if(!valid) {
+    alert("❌ Introduce al menos una medida para guardar.");
+    return;
+  }
+  
+  store.measures.push(data);
+  persist();
+  alert("📏 Medidas añadidas correctamente.");
+  openMeasures(); // Recarga tabla e inputs vacíos
+}
+
+function renderMeasuresTable() {
+  const tbody = document.getElementById("measuresTableBody");
+  tbody.innerHTML = "";
+  
+  if(store.measures.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-slate-500">No hay registros aún</td></tr>`;
+    return;
+  }
+  
+  // Mostrar los registros del más nuevo al más antiguo
+  store.measures.slice().reverse().forEach(m => {
+    tbody.innerHTML += `
+      <tr class="border-b border-slate-700 hover:bg-slate-750">
+        <td class="px-2 py-2 text-xs text-slate-400 font-mono">${m.date}</td>
+        <td class="px-1 py-2 text-center font-bold text-blue-400">${m.brazo || '-'}</td>
+        <td class="px-1 py-2 text-center font-bold text-emerald-400">${m.pierna || '-'}</td>
+        <td class="px-1 py-2 text-center font-bold text-amber-400">${m.cintura || '-'}</td>
+        <td class="px-1 py-2 text-center font-bold text-red-400">${m.estomago || '-'}</td>
+        <td class="px-1 py-2 text-center font-bold text-purple-400">${m.cadera || '-'}</td>
+        <td class="px-1 py-2 text-center font-bold text-pink-400">${m.pecho || '-'}</td>
+      </tr>
+    `;
+  });
+}
+
+// ✅ LOGICA DE LA GRÁFICA DINÁMICA DE MEDIDAS
+function toggleMeasuresChart() {
+  const container = document.getElementById("chartContainer");
+  if(!container.classList.contains("hidden")) {
+    container.classList.add("hidden");
+    return;
+  }
+  
+  if(store.measures.length === 0) {
+    alert("Necesitas registrar datos primero para pintar la gráfica.");
+    return;
+  }
+  
+  container.classList.remove("hidden");
+  
+  // Extraer información cronológicamente (orden normal)
+  const labels = store.measures.map(m => m.date.split(" ")[0]);
+  const bData = store.measures.map(m => m.brazo || null);
+  const pData = store.measures.map(m => m.pierna || null);
+  const cData = store.measures.map(m => m.cintura || null);
+  const eData = store.measures.map(m => m.estomago || null);
+  const caData = store.measures.map(m => m.cadera || null);
+  const peData = store.measures.map(m => m.pecho || null);
+
+  const ctx = document.getElementById('measuresChart').getContext('2d');
+  
+  if (myChartInstance) {
+    myChartInstance.destroy();
+  }
+
+  myChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Brazo', data: bData, borderColor: '#60a5fa', tension: 0.2, spanGaps: true },
+        { label: 'Pierna', data: pData, borderColor: '#34d399', tension: 0.2, spanGaps: true },
+        { label: 'Cintura', data: cData, borderColor: '#fbbf24', tension: 0.2, spanGaps: true },
+        { label: 'Estómago', data: eData, borderColor: '#f87171', tension: 0.2, spanGaps: true },
+        { label: 'Cadera', data: caData, borderColor: '#c084fc', tension: 0.2, spanGaps: true },
+        { label: 'Pecho', data: peData, borderColor: '#f472b6', tension: 0.2, spanGaps: true }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 10 } } }
+      },
+      scales: {
+        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: '#334155' } },
+        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+      }
+    }
+  });
+}
+
+// ================= BACKUP FUNCIONES =================
+function exportData(){
+  const blob = new Blob([JSON.stringify(store)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "gym_backup.json";
+  a.click();
+}
+
+function importData(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        localStorage.setItem("gymPro", JSON.stringify(data));
+        alert("✅ Datos restaurados");
+        location.reload();
+      } catch {
+        alert("❌ Error en archivo");
+      }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+
+  input.click();
+}
+
+</script>
+</body>
+</html>
