@@ -4,17 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- ✅ MODO APP IPHONE -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0f172a">
 
 <title>Gestor Rutina Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- ✅ Librería para Gráficas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- ✅ FIX iPhone inputs -->
 <style>
 input { font-size:16px; }
-/* Quitar flechas molestas en inputs numéricos */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -32,17 +34,20 @@ input[type=number] {
 
 <h1 class="text-3xl font-bold mb-4">🏋️ Gestor de Rutina Semanal</h1>
 
+<!-- ✅ BACKUP -->
 <div class="flex gap-2 mb-4">
   <button onclick="exportData()" class="bg-green-600 px-3 py-2 rounded text-sm font-semibold">📤 Exportar Copia</button>
   <button onclick="importData()" class="bg-blue-600 px-3 py-2 rounded text-sm font-semibold">📥 Importar Copia</button>
 </div>
 
-<p class="mb-4 text-slate-300">Incluye cronómetro manual, historial por ejercicio, control de medidas corporales y guardado local.</p>
+<p class="mb-4 text-slate-300">Incluye cronómetro manual, historial con orden invertido, guía de técnica detallada y control de medidas.</p>
 
+<!-- PÁGINA PRINCIPAL (MENÚ) -->
 <div id="mainPage">
   <div id="menu" class="grid md:grid-cols-2 lg:grid-cols-5 gap-4"></div>
 </div>
 
+<!-- VISTA DE RUTINAS -->
 <div id="routineView" class="hidden">
 <div class="flex gap-2 mb-3">
   <button onclick="backHome()" class="bg-slate-700 px-3 py-2 rounded text-sm font-semibold">⬅ Volver</button>
@@ -63,6 +68,7 @@ input[type=number] {
 
 <div id="exercises"></div>
 
+<!-- ✅ BOTÓN FINALIZAR SESIÓN -->
 <div class="mt-6 mb-8 text-center">
   <button onclick="finishRoutine()" class="bg-green-600 hover:bg-green-500 text-white text-xl font-bold py-4 px-8 rounded-xl shadow-lg transition w-full md:w-auto">
     🏁 Finalizar Sesión y Guardar
@@ -70,13 +76,20 @@ input[type=number] {
 </div>
 </div>
 
+<!-- VISTA DE MEDIDAS -->
 <div id="measuresView" class="hidden">
   <button onclick="backHome()" class="bg-slate-700 px-3 py-2 rounded mb-4 text-sm font-semibold">⬅ Volver</button>
   
   <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Formulario Nueva Medida -->
     <div class="bg-slate-800 p-6 rounded-xl">
-      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">📏 Registrar Medidas (cm)</h2>
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">📏 Registrar Peso y Medidas (cm)</h2>
       <div class="grid grid-cols-2 gap-4">
+        <!-- ✅ APARTADO PESO ADICIONADO -->
+        <div class="col-span-2 bg-slate-900 p-3 rounded-lg border border-slate-700 mb-2">
+          <label class="block text-amber-400 text-sm font-bold mb-1 text-center">Peso Corporal (kg)</label>
+          <input id="m_peso" class="w-full text-black p-2 rounded text-center font-extrabold text-lg bg-amber-100" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
+        </div>
         <div>
           <label class="block text-slate-400 text-sm mb-1">Brazo</label>
           <input id="m_brazo" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
@@ -102,9 +115,10 @@ input[type=number] {
           <input id="m_pecho" class="w-full text-black p-2 rounded text-center font-bold" type="number" step="0.1" inputmode="decimal" placeholder="0.0">
         </div>
       </div>
-      <button onclick="saveMeasures()" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-lg">💾 Guardar Medidas</button>
+      <button onclick="saveMeasures()" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-lg">💾 Guardar Registro</button>
     </div>
 
+    <!-- Historial y Botón de Gráfica -->
     <div class="bg-slate-800 p-6 rounded-xl flex flex-col justify-between">
       <div>
         <div class="flex justify-between items-center mb-4">
@@ -112,15 +126,17 @@ input[type=number] {
           <button onclick="toggleMeasuresChart()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded font-bold text-sm">📊 Ver/Ocultar Gráfica</button>
         </div>
         
+        <!-- Contenedor del Gráfico Dinámico -->
         <div id="chartContainer" class="hidden bg-slate-950 p-2 rounded-lg mb-4">
           <canvas id="measuresChart" class="w-full h-64"></canvas>
         </div>
 
-        <div class="overflow-x-auto max-h-80 overflow-y-auto">
+        <div class="overflow-x-auto max-h-96 overflow-y-auto">
           <table class="w-full text-sm text-left text-slate-300">
             <thead class="text-xs uppercase bg-slate-700 text-slate-200 sticky top-0">
               <tr>
                 <th class="px-2 py-2">Fecha</th>
+                <th class="px-1 py-2 text-center text-amber-400">Kg</th>
                 <th class="px-1 py-2 text-center">Br</th>
                 <th class="px-1 py-2 text-center">Pi</th>
                 <th class="px-1 py-2 text-center">Ci</th>
@@ -130,7 +146,8 @@ input[type=number] {
               </tr>
             </thead>
             <tbody id="measuresTableBody">
-              </tbody>
+              <!-- Rellenado dinámicamente -->
+            </tbody>
           </table>
         </div>
       </div>
@@ -138,13 +155,14 @@ input[type=number] {
   </div>
 </div>
 
-<div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 overflow-auto z-50">
-<div class="max-w-4xl mx-auto bg-slate-800 p-4 rounded">
-<div class="flex justify-between">
-<h3 class="text-xl font-bold">📈 Histórico</h3>
-<button onclick="closeModal()" class="text-2xl font-bold">&times;</button>
+<!-- MODAL PRINCIPAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 overflow-auto z-50 flex items-center justify-center">
+<div class="w-full max-w-4xl bg-slate-800 p-6 rounded-xl shadow-2xl relative">
+<div class="flex justify-between items-center border-b border-slate-700 pb-3">
+<h3 id="modalTitle" class="text-xl font-bold text-emerald-400"></h3>
+<button onclick="closeModal()" class="text-3xl font-bold leading-none hover:text-slate-400">&times;</button>
 </div>
-<div id="modalContent" class="mt-4"></div>
+<div id="modalContent" class="mt-4 overflow-y-auto max-h-[75vh]"></div>
 </div>
 </div>
 
@@ -152,45 +170,73 @@ input[type=number] {
 
 <script>
 
-// ✅ STORAGE SEGURO (Mantiene lógica original + Ampliación para medidas)
+// ✅ INSTANCIACIÓN DE BASE DE DATOS LOCAL SEGURA
 let store;
 try {
   store = JSON.parse(localStorage.getItem("gymPro")) 
     || {sessions:[],history:{},active:{}, measures:[]};
-  if(!store.measures) store.measures = []; // Por si venías de una versión antigua
+  if(!store.measures) store.measures = [];
 } catch {
   store = {sessions:[],history:{},active:{}, measures:[]};
 }
 
+// ✅ RUTINA ORIGINAL CON NUEVAS DESCRIPCIONES TÉCNICAS COMPLETAS PARA EJECUCIÓN SIN IMÁGENES
 const routines={
 "Sesion 1 Superior":[
-["Press mancuernas plano",4,"8-10"],["Remo pecho apoyado",4,"8-10"],["Pullover",3,"12-15"],["Elevaciones laterales",2,"15"],["Curl alterno",3,"10-12"],["Abwheel",3,"6-10"]
+  ["Press mancuernas plano",4,"8-10"],["Remo pecho apoyado",4,"8-10"],["Pullover",3,"12-15"],["Elevaciones laterales",2,"15"],["Curl alterno",3,"10-12"],["Abwheel",3,"6-10"]
 ],
 "Sesion 2 Inferior":[
-["Sentadilla Goblet",4,"10-12"],["Bulgarian split",3,"10"],["Hip thrust",4,"10"],["Plancha frontal",3,"45s"],["Plancha lateral",3,"30s"]
+  ["Sentadilla Goblet",4,"10-12"],["Bulgarian split",3,"10"],["Hip thrust",4,"10"],["Plancha frontal",3,"45s"],["Plancha lateral",3,"30s"]
 ],
 "Sesion 3 Superior":[
-["Flexiones déficit",4,"10-15"],["Remo unilateral",4,"10-12"],["Press inclinado",3,"10"],["Face pull goma",3,"15"],["Curl araña",3,"12"],["Katana tríceps",3,"12-15"]
+  ["Flexiones déficit",4,"10-15"],["Remo unilateral",4,"10-12"],["Press inclinado",3,"10"],["Face pull goma",3,"15"],["Curl araña",3,"12"],["Katana tríceps",3,"12-15"]
 ],
 "Sesion 4 Inferior":[
-["Hack squat",4,"10-12"],["Peso muerto rumano",4,"10"],["Step up",3,"12"],["Sentadilla isométrica",3,"45-60s"],["Russian twist",3,"20"]
+  ["Hack squat",4,"10-12"],["Peso muerto rumano",4,"10"],["Step up",3,"12"],["Sentadilla isométrica",3,"45-60s"],["Russian twist",3,"20"]
 ]
 };
 
-const desc={};
-Object.keys(routines).forEach(r=>routines[r].forEach(e=>desc[e[0]]="Ejecuta el movimiento de forma controlada, manteniendo una técnica correcta y rango completo."));
+const desc={
+  // Sesión 1
+  "Press mancuernas plano": "Acuéstate boca arriba en un banco plano con los pies firmes en el suelo. Sostén una mancuerna en cada mano alineadas al pecho. Contrae los omóplatos empujándolos contra el banco. Inicia con los brazos extendidos y desciende las mancuernas de manera controlada doblando los codos a un ángulo de 45 grados respecto al torso, hasta que las mancuernas toquen ligeramente los lados del pecho. Empuja el peso verticalmente hacia arriba contrayendo el pectoral hasta extender los brazos sin bloquear los codos por completo.",
+  "Remo pecho apoyado": "Ajusta un banco inclinado a unos 30-45 grados. Colócate boca abajo apoyando el pecho firmemente contra el respaldo, dejando que los brazos cuelguen rectos hacia abajo sosteniendo las mancuernas con agarre neutro (palmas mirándose). Sin despegar el pecho del banco ni balancear el cuello, tracciona las mancuernas hacia tus caderas llevando los codos hacia atrás y arriba. Aprieta las escápulas al final del movimiento durante un segundo y desciende el peso de forma pausada regresando los brazos a la posición colgante inicial.",
+  "Pullover": "Acuéstate perpendicularmente sobre un banco apoyando únicamente la parte alta de la espalda (escapulas), con la cadera suspendida y ligeramente baja, pies firmes en el suelo. Sostén una mancuerna con ambas manos formando un rombo con tus pulgares e índices bajo el disco superior. Con los brazos casi rectos (ligera flexión en los codos para proteger la articulación), lleva la mancuerna hacia atrás de tu cabeza de forma lenta hasta que tus brazos queden alineados con tu torso sintiendo el estiramiento en dorsales y pecho. Regresa el peso verticalmente sobre tu pecho contrayendo el dorsal.",
+  "Elevaciones laterales": "Párate recto con los pies al ancho de las caderas, flexiona ligeramente las rodillas e inclina el torso apenas unos centímetros hacia adelante para estabilizar la columna. Sostén las mancuernas frente a tus muslos. Manteniendo una flexión constante e interna en los codos, eleva las mancuernas hacia los lados dibujando un arco amplio en dirección 'hacia afuera' en lugar de 'hacia arriba'. Sube hasta que los brazos queden paralelos al suelo (altura del hombro) con los meñiques sutilmente más altos que los pulgares. Desciende reteniendo la gravedad.",
+  "Curl alterno": "Póngase de pie con la columna erguida y los pies separados al ancho de hombros. Comience con una mancuerna en cada mano colgando a los costados con agarre neutro (tipo martillo). De forma alterna, contrae el bíceps de un brazo flexionando el codo hacia arriba; durante la primera mitad de la subida rota la muñeca hacia afuera (supinación) para que la palma de la mano mire hacia tu hombro en el punto más alto. Aprieta el bíceps, desciende invirtiendo la rotación y repite idénticamente con el brazo opuesto manteniendo el resto del cuerpo inmóvil.",
+  "Abwheel": "Colócate de rodillas en el suelo con la rueda abdominal justo debajo de tus hombros, sujetando firmemente los mangos laterales. Contrae el abdomen profundamente desde la posición inicial encorvando ligeramente la espalda alta (posición de gato) para bloquear la zona lumbar. Desplaza la rueda hacia adelante extendiendo tus caderas y brazos al mismo tiempo de manera lineal. Avanza exhalando hasta el punto máximo donde sientas tensión en el abdomen pero sin perder la neutralidad de la espalda baja. Regresa contrayendo el abdomen hacia la postura inicial.",
+  
+  // Sesión 2
+  "Sentadilla Goblet": "Párate con los pies un poco más abiertos que el ancho de los hombros y las puntas apuntando ligeramente hacia afuera (unos 15-30 grados). Sostén una mancuerna pesada verticalmente con ambas manos pegada firmemente contra el centro de tu pecho, manteniendo los codos cerrados apuntando al suelo. Inicia el movimiento empujando la cadera hacia atrás y doblando las rodillas de forma simultánea. Desciende manteniendo el torso erguido hasta que tus muslos rompan el paralelo con el suelo (o hasta donde mantengas la espalda recta). Rompe la inercia empujando con toda la planta del pie hacia arriba.",
+  "Bulgarian split": "Colócate de espaldas a un banco a un paso de distancia. Da un paso al frente con el pie activo, asentándolo plano en el suelo, y ubica el empeine del pie trasero sobre la superficie del banco. Mantén las mancuernas a los costados con los brazos estirados. Baja la cadera verticalmente flexionando la rodilla delantera; asegúrate de que dicha rodilla descienda alineada con la punta del pie sin sobrepasarla excesivamente. Baja hasta que el muslo delantero quede paralelo al suelo y la rodilla trasera casi toque el piso. Empuja con el talón delantero para reincorporarte.",
+  "Hip thrust": "Siéntate en el suelo apoyando la parte inferior de tus escápulas contra el borde de un banco plano. Coloca una barra o mancuerna pesada sobre tu pelvis (usa almohadilla). Dobla las rodillas colocando los pies firmes en el suelo, separados al ancho de hombros y a una distancia tal que, al subir, tus espinillas queden completamente verticales (90 grados). Empuja fuertemente a través de tus talones elevando la cadera hacia el techo, alineando los muslos con el torso en una línea horizontal plana. Aprieta los glúteos un segundo arriba manteniendo la mirada al frente y baja controlado.",
+  "Plancha frontal": "Colócate boca abajo en el suelo apoyando tu peso exclusivamente en los antebrazos y en las puntas de los pies. Los codos deben situarse exactamente debajo de la línea de los hombros formando un ángulo recto. Contrae activamente tus cuádriceps, glúteos y el abdomen. Tu cuerpo debe trazar una línea perfectamente recta desde la cabeza hasta los talones. Evita a toda costa dejar caer la cadera hacia el suelo o elevar los glúteos formando una pirámide; mantén el cuello alineado mirando al suelo.",
+  "Plancha lateral": "Acuéstate sobre un costado de tu cuerpo en el suelo. Apoya el antebrazo del lado inferior de manera que el codo quede justo debajo del hombro, perpendicular al torso. Coloca un pie directamente sobre el otro (o cruzado al frente para mayor balance). Eleva activamente las caderas separando todo el cuerpo del suelo hasta formar una línea diagonal recta desde la cabeza hasta los pies. Contrae la zona lateral del abdomen (oblicuos) y mantén el brazo libre extendido hacia arriba o firme sobre tu cadera.",
+  
+  // Sesión 3
+  "Flexiones déficit": "Coloca dos soportes estables, discos pesados o mancuernas tipo hexágono en el suelo, separados a una distancia ligeramente mayor al ancho de tus hombros. Adopta la posición de plancha alta sujetando los soportes con las manos alineadas. Manteniendo el cuerpo rígido como un bloque, flexiona los codos hacia atrás en un ángulo de 45 grados, permitiendo que tu pecho descienda por debajo de la línea de tus manos aprovechando el espacio libre (déficit). Baja hasta sentir un estiramiento seguro en el pectoral y empuja con potencia hasta estirar los brazos.",
+  "Remo unilateral": "Coloca la rodilla y la mano del mismo lado sobre un banco plano, manteniendo el torso completamente horizontal y paralelo al suelo con la espalda recta. El otro pie permanece apoyado plano en el suelo a un costado. Sostén una mancuerna con el brazo libre extendido verticalmente. Inicia la tracción tirando del codo hacia atrás y hacia arriba, dirigiendo la mancuerna directamente hacia tu cadera (no hacia el hombro). Contrae firmemente el dorsal en el punto más alto y desciende estirando el brazo por completo de forma controlada.",
+  "Press inclinado": "Siéntate en un banco regulado a una inclinación de entre 30 y 45 grados. Apoya la espalda por completo y mantén los pies en el suelo. Sostén las mancuernas a los lados de tus hombros con las palmas orientadas hacia adelante y los codos flexionados apuntando en diagonal al suelo. Empuja las mancuernas verticalmente hacia el techo siguiendo una trayectoria convergente (se acercan levemente arriba sin chocar). Contrae el pecho superior en la cima del movimiento y desciende reteniendo el peso hasta que toquen sutilmente los hombros.",
+  "Face pull goma": "Sjeta una banda elástica a una estructura sólida a la altura de tu frente o parte alta del pecho. Da unos pasos hacia atrás para generar tensión en la goma y sepárate con los pies al ancho de hombros, rodillas algo flexionadas. Sostén los extremos de la banda con las palmas orientadas hacia el suelo y brazos extendidos. Tracciona la goma directamente hacia tu rostro (puños en dirección a tus orejas), abriendo los codos hacia afuera y atrás de forma exagerada mientras separas la banda. Aprieta las escápulas y la parte posterior del hombro por un segundo.",
+  "Curl araña": "Colócate boca abajo de forma inversa en un banco inclinado a 45 grados, apoyando el pecho firmemente en la parte superior del respaldo. Tus brazos deben colgar verticalmente hacia el suelo debido a la gravedad, sosteniendo una mancuerna en cada mano con agarre supino (palmas al frente). Manteniendo los codos fijos y completamente perpendiculares al suelo en todo momento, flexiona los antebrazos hacia arriba aislando el bíceps. Contrae al máximo arriba y desciende muy despacio estirando el brazo de forma excéntrica.",
+  "Katana tríceps": "Colócate de pie o sentado con la espalda recta. Eleva una mancuerna por encima de tu cabeza sosteniéndola con una mano, extendiendo el brazo de forma vertical. Coloca el codo apuntando hacia el frente y lo más pegado que puedas a tu oreja. Con la palma de la mano mirando de reojo hacia adentro, flexiona el codo dejando caer la mancuerna de forma lenta y profunda por detrás de tu nuca hasta sentir un estiramiento extremo en el tríceps. Contrae el músculo extendiendo el brazo nuevamente a la vertical.",
+  
+  // Sesión 4
+  "Hack squat": "Colócate en la máquina de sentadilla Hack apoyando la espalda y hombros firmemente contra los respaldos acolchados. Ubica los pies en la plataforma central separados al ancho de hombros. Quita los seguros laterales de la máquina. Desciende flexionando las rodillas de forma controlada de modo que tus caderas bajen en línea diagonal por debajo de tus rodillas, buscando un ángulo profundo de 90 grados en las piernas. Manteniendo la espalda totalmente pegada al soporte, empuja con los talones la plataforma para regresar arriba sin bloquear rodillas.",
+  "Peso muerto rumano": "Párate erguido sosteniendo una mancuerna en cada mano frente a tus muslos con los brazos estirados. Coloca los pies al ancho de las caderas con las rodillas desbloqueadas (apenas flexionadas unos milímetros). Inicia el ejercicio empujando tu cadera estrictamente hacia atrás como si quisieras tocar la pared con los glúteos. Deja que las mancuernas desciendan rozando verticalmente tus piernas mientras doblas el torso manteniendo la espalda perfectamente recta. Baja hasta la altura de tus espinillas sintiendo un fuerte estiramiento en los femorales, y regresa contrayendo glúteos.",
+  "Step up": "Párate frente a un cajón, banco o plataforma estable que tenga una altura aproximada a tus rodillas. Coloca un pie por completo encima de la plataforma de modo que toda la planta esté en contacto. Transfiere el peso de tu cuerpo a la pierna elevada y empuja con fuerza hacia abajo a través de tu talón para elevar todo tu cuerpo, extendiendo la pierna por completo arriba. El pie de apoyo solo asiste mínimamente en el despegue. Baja de forma pausada reteniendo la caída con la pierna del cajón hasta tocar el suelo.",
+  "Sentadilla isométrica": "Apoya tu espalda completamente recta contra una pared firme. Desplaza tus pies hacia adelante y ve deslizando tu cuerpo hacia abajo por la pared hasta que tus rodillas formen un ángulo exacto de 90 grados y tus muslos queden perfectamente paralelos al suelo (como si estuvieses sentado en una silla invisible). Tus tobillos deben quedar situados directamente bajo tus rodillas. Presiona los hombros contra la pared, mantén los brazos cruzados o relajados y sostén estáticamente la posición apretando cuádriceps.",
+  "Russian twist": "Siéntate en el suelo con las rodillas dobladas y los pies juntos flotando sutilmente a unos centímetros del piso (nivel intermedio) o apoyados (principiante). Inclina el torso hacia atrás en un ángulo de 45 grados respecto al suelo para activar la pared abdominal. Sostén una mancuerna pequeña o tus manos juntas frente al pecho. Gira todo tu torso de forma compacta de lado a lado, intentando llevar la carga a tocar el suelo cerca de tu cadera izquierda y luego hacia la derecha, moviendo los hombros no los brazos."
+};
 
 let current=null,startTime=null,timerInt=null,timerRunning=false;
-let myChartInstance = null; // Instancia global de Chart.js
+let myChartInstance = null; 
 
 const menu=document.getElementById("menu");
 
-// Generar botones de rutinas en el menú principal
 Object.keys(routines).forEach(r=>{
-  menu.innerHTML+=`<button class="bg-slate-800 p-6 rounded-xl hover:bg-slate-700 text-lg font-bold border border-slate-700 transition flex flex-col items-center justify-center gap-2" onclick="openRoutine('${r}')"><span>🏋️‍♂️</span> ${r}</button>`;
+  menu.innerHTML+=`<button class="bg-slate-800 p-4 rounded hover:bg-slate-700 font-medium" onclick="openRoutine('${r}')">${r}</button>`;
 });
-// ✅ Añadir botón de Medidas al final
-menu.innerHTML+=`<button class="bg-gradient-to-br from-blue-900 to-indigo-900 p-6 rounded-xl hover:from-blue-800 hover:to-indigo-800 text-lg font-bold border border-blue-700 transition flex flex-col items-center justify-center gap-2" onclick="openMeasures()"><span>📏</span> Medidas Corporales</button>`;
+menu.innerHTML+=`<button class="bg-gradient-to-br from-indigo-900 to-slate-800 p-4 rounded hover:from-indigo-800 text-amber-400 font-bold border border-indigo-700" onclick="openMeasures()">📏 Medidas Corporales</button>`;
 
 function openRoutine(r){
 current=r;
@@ -198,7 +244,7 @@ document.getElementById("mainPage").classList.add("hidden");
 document.getElementById("routineView").classList.remove("hidden");
 document.getElementById("title").textContent=r;
 
-// ✅ Lógica de resetear sesión activa al abrir: Cajas en blanco siempre al iniciar
+// ✅ Cada vez que se abra una sesión los cuadros estarán limpios (en blanco)
 routines[current].forEach((e, idx) => {
   for(let i=1; i<=e[1]; i++) {
     delete store.active[`${current}_${idx}_${i}`];
@@ -206,17 +252,14 @@ routines[current].forEach((e, idx) => {
 });
 persist();
 
-// Resetear Cronómetro y prepararlo para inicio manual
 clearInterval(timerInt);
 timerRunning = false;
 startTime = null;
 document.getElementById("timer").textContent = "00:00:00";
 document.getElementById("startTimerBtn").classList.remove("hidden");
-
 render();
 }
 
-// ✅ INICIO MANUAL DEL CRONÓMETRO
 function startTimerManual() {
   if (timerRunning) return;
   startTime = Date.now();
@@ -240,13 +283,16 @@ ex.innerHTML="";
 let total=0,done=0;
 
 routines[current].forEach((e,idx)=>{
-let html=`<div class="bg-slate-800 p-4 rounded-xl mb-4 border border-slate-700">
-<div class="flex justify-between items-center mb-1">
-<h3 class="font-bold text-lg text-emerald-400">${e[0]}</h3>
-<button class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-xs font-semibold" onclick="showHistory('${e[0]}')">📈 Histórico</button>
+// ✅ Eliminado texto fijo e incorporado Icono Info Inteligente
+let html=`<div class="bg-slate-800 p-4 rounded mb-4">
+<div class="flex justify-between items-center mb-2">
+  <div class="flex items-center gap-2">
+    <h3 class="font-bold text-lg">${e[0]}</h3>
+    <button onclick="showInfoModal('${e[0]}')" class="text-blue-400 hover:text-blue-300 bg-slate-900/60 font-serif font-bold text-sm w-6 h-6 rounded-full flex items-center justify-center border border-blue-500/30 shadow" title="Ver guía de ejecución técnica">ⓘ</button>
+  </div>
+  <button class="bg-indigo-600 px-2 py-1 rounded text-xs font-semibold" onclick="showHistory('${e[0]}')">📈 Histórico</button>
 </div>
-<p class="text-slate-400 text-xs mb-2">${desc[e[0]]}</p>
-<p class="mb-3 text-sm font-semibold text-slate-300">🎯 ${e[1]} series x ${e[2]} reps</p>`;
+<p class="mb-3 text-sm text-slate-300">🎯 ${e[1]} series · ${e[2]} reps</p>`;
 
 for(let i=1;i<=e[1];i++){
 total++;
@@ -255,15 +301,11 @@ let data=store.active[key]||{reps:"",weight:""};
 
 if(data.reps && data.weight) done++;
 
-html+=`<div class="grid grid-cols-4 gap-2 mb-2 items-center text-sm bg-slate-900/50 p-1.5 rounded">
-<div class="text-slate-400 pl-1 font-medium">Serie ${i}</div>
-<div>
-  <input class="w-full text-black p-1 rounded text-center font-bold" type="number" inputmode="numeric" value="${data.reps}" placeholder="Reps" onchange="saveSet('${key}','reps',this.value)">
-</div>
-<div>
-  <input class="w-full text-black p-1 rounded text-center font-bold" type="number" inputmode="decimal" step="any" value="${data.weight}" placeholder="Peso" onchange="saveSet('${key}','weight',this.value)">
-</div>
-<div class="text-center text-lg">${data.reps&&data.weight?'✅':'⏳'}</div>
+html+=`<div class="grid grid-cols-4 gap-2 mb-2 items-center text-sm">
+<div>Serie ${i}</div>
+<input class="text-black p-1 rounded text-center" type="number" inputmode="numeric" value="${data.reps}" placeholder="Reps" onchange="saveSet('${key}','reps',this.value)">
+<input class="text-black p-1 rounded text-center" type="number" inputmode="decimal" step="any" value="${data.weight}" placeholder="Peso" onchange="saveSet('${key}','weight',this.value)">
+<div class="text-center">${data.reps&&data.weight?'✅':'⏳'}</div>
 </div>`;
 }
 
@@ -283,11 +325,8 @@ persist();
 render();
 }
 
-// ✅ SE EJECUTA SÓLO AL DARLE AL BOTÓN EXPLÍCITO DE FINALIZAR
 function finishRoutine(){
-// Forzar detención de cronómetro si seguía corriendo
 clearInterval(timerInt);
-
 let duration=document.getElementById("timer").textContent;
 let date=new Date().toLocaleString();
 
@@ -305,7 +344,6 @@ store.history[e[0]].push(entry);
 
 store.sessions.push({date,routine:current,duration});
 
-// Limpiar sesión activa al acabar definitivamente
 routines[current].forEach((e, idx) => {
   for(let i=1; i<=e[1]; i++) {
     delete store.active[`${current}_${idx}_${i}`];
@@ -313,36 +351,46 @@ routines[current].forEach((e, idx) => {
 });
 
 persist();
-alert("🎉 Rutina guardada con éxito en el historial.\nDuración total: "+duration);
+alert("🎉 Rutina completada y guardada. Tiempo total: "+duration);
 backHome();
 }
 
+// ✅ 2. HISTORIAL DE EJERCICIO: Muestra la última entrada ingresada más arriba (Reversado)
 function showHistory(ex){
 let h=store.history[ex]||[];
-let out=`<h4 class='font-bold text-xl mb-3 text-emerald-400'>${ex}</h4>`;
+document.getElementById("modalTitle").textContent = "Historial - " + ex;
+let out="";
 
-if(!h.length) out+="<p class='text-slate-400'>Sin historial registrado en este ejercicio.</p>";
+if(!h.length) out+="<p class='text-slate-400 p-2'>Sin historial guardado todavía.</p>";
 
+// El .slice().reverse() asegura invertir el orden de despliegue cronológico
 h.slice().reverse().forEach(s=>{
-out+=`<div class="border border-slate-700 bg-slate-900 p-3 mb-3 rounded-lg text-sm">
-<div class="grid grid-cols-2 gap-1 mb-2 text-slate-300">
+out+=`<div class="border border-slate-600 bg-slate-900 p-3 mb-3 rounded-lg text-sm">
+<div class="grid grid-cols-2 gap-2 mb-2 text-slate-400">
   <div><b>Fecha:</b> ${s.date}</div>
   <div><b>Duración:</b> ${s.duration}</div>
 </div>
-
-<table class="w-full mt-2 text-center text-xs">
-<tr class="bg-slate-700 text-slate-200">
-  <th class="py-1">Serie</th>
-  <th class="py-1">Reps</th>
-  <th class="py-1">Peso (kg)</th>
-</tr>
-${s.sets.map(x=>`<tr class="border-b border-slate-800"><td class="py-1 font-bold">${x.serie}</td><td>${x.reps || '-'}</td><td>${x.weight || '-'}</td></tr>`).join("")}
+<table class="w-full text-center mt-2">
+<tr class="bg-slate-700 text-slate-200 text-xs"><th>Serie</th><th>Reps</th><th>Peso</th></tr>
+${s.sets.map(x=>`<tr class="border-b border-slate-800"><td class="py-1 font-bold">Serie ${x.serie}</td><td>${x.reps || '-'}</td><td>${x.weight ? x.weight+' kg' : '-'}</td></tr>`).join("")}
 </table>
 </div>`;
 });
 
 document.getElementById("modalContent").innerHTML=out;
 document.getElementById("modal").classList.remove("hidden");
+}
+
+// ✅ 4. MODAL DETALLE DE EJECUCIÓN TÉCNICA (DESDE ICONO INFO)
+function showInfoModal(name) {
+  document.getElementById("modalTitle").textContent = "Guía de Ejecución: " + name;
+  let text = desc[name] || "Descripción técnica no disponible para este ejercicio.";
+  document.getElementById("modalContent").innerHTML = `
+    <div class="bg-slate-900 p-4 rounded-xl border border-blue-500/20 leading-relaxed text-slate-200">
+      <p class="text-base font-normal whitespace-pre-line">${text}</p>
+    </div>
+  `;
+  document.getElementById("modal").classList.remove("hidden");
 }
 
 function closeModal(){
@@ -366,10 +414,10 @@ document.getElementById("mainPage").classList.remove("hidden");
 function openMeasures(){
   document.getElementById("mainPage").classList.add("hidden");
   document.getElementById("measuresView").classList.remove("hidden");
-  // Ocultar gráfica por defecto al entrar
   document.getElementById("chartContainer").classList.add("hidden");
   
   // Limpiar inputs
+  document.getElementById("m_peso").value = "";
   const fields = ['brazo', 'pierna', 'cintura', 'estomago', 'cadera', 'pecho'];
   fields.forEach(f => document.getElementById(`m_${f}`).value = "");
   
@@ -378,11 +426,14 @@ function openMeasures(){
 
 function saveMeasures() {
   const fields = ['brazo', 'pierna', 'cintura', 'estomago', 'cadera', 'pecho'];
+  let pesoVal = document.getElementById("m_peso").value;
+
   let data = {
-    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+    peso: pesoVal ? parseFloat(pesoVal) : 0
   };
   
-  let valid = false;
+  let valid = pesoVal ? true : false;
   fields.forEach(f => {
     let val = document.getElementById(`m_${f}`).value;
     if(val) valid = true;
@@ -390,42 +441,43 @@ function saveMeasures() {
   });
   
   if(!valid) {
-    alert("❌ Introduce al menos una medida para guardar.");
+    alert("❌ Rellena el peso o al menos una medida corporal para registrar.");
     return;
   }
   
   store.measures.push(data);
   persist();
-  alert("📏 Medidas añadidas correctamente.");
-  openMeasures(); // Recarga tabla e inputs vacíos
+  alert("📏 Registro guardado exitosamente.");
+  openMeasures(); 
 }
 
+// ✅ 2. HISTORIAL DE MEDIDAS: Últimas entradas puestas más arriba (.reverse())
 function renderMeasuresTable() {
   const tbody = document.getElementById("measuresTableBody");
   tbody.innerHTML = "";
   
   if(store.measures.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-slate-500">No hay registros aún</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-slate-500">Sin datos cargados.</td></tr>`;
     return;
   }
   
-  // Mostrar los registros del más nuevo al más antiguo
   store.measures.slice().reverse().forEach(m => {
     tbody.innerHTML += `
-      <tr class="border-b border-slate-700 hover:bg-slate-750">
-        <td class="px-2 py-2 text-xs text-slate-400 font-mono">${m.date}</td>
-        <td class="px-1 py-2 text-center font-bold text-blue-400">${m.brazo || '-'}</td>
-        <td class="px-1 py-2 text-center font-bold text-emerald-400">${m.pierna || '-'}</td>
-        <td class="px-1 py-2 text-center font-bold text-amber-400">${m.cintura || '-'}</td>
-        <td class="px-1 py-2 text-center font-bold text-red-400">${m.estomago || '-'}</td>
-        <td class="px-1 py-2 text-center font-bold text-purple-400">${m.cadera || '-'}</td>
-        <td class="px-1 py-2 text-center font-bold text-pink-400">${m.pecho || '-'}</td>
+      <tr class="border-b border-slate-700 hover:bg-slate-750 text-xs">
+        <td class="px-1 py-2 text-slate-400 font-mono">${m.date}</td>
+        <td class="px-1 py-2 text-center font-extrabold text-amber-400 bg-amber-500/10">${m.peso || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-blue-400">${m.brazo || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-emerald-400">${m.pierna || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-orange-400">${m.cintura || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-red-400">${m.estomago || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-purple-400">${m.cadera || '-'}</td>
+        <td class="px-1 py-2 text-center font-semibold text-pink-400">${m.pecho || '-'}</td>
       </tr>
     `;
   });
 }
 
-// ✅ LOGICA DE LA GRÁFICA DINÁMICA DE MEDIDAS
+// ✅ LOGICA DE LA GRÁFICA INCLUYENDO EL PESO CORPORAL
 function toggleMeasuresChart() {
   const container = document.getElementById("chartContainer");
   if(!container.classList.contains("hidden")) {
@@ -434,16 +486,16 @@ function toggleMeasuresChart() {
   }
   
   if(store.measures.length === 0) {
-    alert("Necesitas registrar datos primero para pintar la gráfica.");
+    alert("Registra datos de evolución primero.");
     return;
   }
   
   container.classList.remove("hidden");
   
-  // Extraer información cronológicamente (orden normal)
   const labels = store.measures.map(m => m.date.split(" ")[0]);
+  const pData = store.measures.map(m => m.peso || null);
   const bData = store.measures.map(m => m.brazo || null);
-  const pData = store.measures.map(m => m.pierna || null);
+  const piData = store.measures.map(m => m.pierna || null);
   const cData = store.measures.map(m => m.cintura || null);
   const eData = store.measures.map(m => m.estomago || null);
   const caData = store.measures.map(m => m.cadera || null);
@@ -460,19 +512,20 @@ function toggleMeasuresChart() {
     data: {
       labels: labels,
       datasets: [
-        { label: 'Brazo', data: bData, borderColor: '#60a5fa', tension: 0.2, spanGaps: true },
-        { label: 'Pierna', data: pData, borderColor: '#34d399', tension: 0.2, spanGaps: true },
-        { label: 'Cintura', data: cData, borderColor: '#fbbf24', tension: 0.2, spanGaps: true },
-        { label: 'Estómago', data: eData, borderColor: '#f87171', tension: 0.2, spanGaps: true },
-        { label: 'Cadera', data: caData, borderColor: '#c084fc', tension: 0.2, spanGaps: true },
-        { label: 'Pecho', data: peData, borderColor: '#f472b6', tension: 0.2, spanGaps: true }
+        { label: 'Peso (kg)', data: pData, borderColor: '#fbbf24', borderWidth: 2.5, tension: 0.15, spanGaps: true },
+        { label: 'Brazo', data: bData, borderColor: '#60a5fa', tension: 0.15, spanGaps: true },
+        { label: 'Pierna', data: piData, borderColor: '#34d399', tension: 0.15, spanGaps: true },
+        { label: 'Cintura', data: cData, borderColor: '#f97316', tension: 0.15, spanGaps: true },
+        { label: 'Estómago', data: eData, borderColor: '#f87171', tension: 0.15, spanGaps: true },
+        { label: 'Cadera', data: caData, borderColor: '#c084fc', tension: 0.15, spanGaps: true },
+        { label: 'Pecho', data: peData, borderColor: '#f472b6', tension: 0.15, spanGaps: true }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 10 } } }
+        legend: { labels: { color: '#cbd5e1', boxWidth: 8, font: { size: 10 } } }
       },
       scales: {
         x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { color: '#334155' } },
